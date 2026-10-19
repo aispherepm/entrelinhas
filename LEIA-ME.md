@@ -7,7 +7,7 @@ Diário pessoal em português, feito para o iPhone. Funciona como app da Tela de
 | Arquivo | Para que serve |
 |---|---|
 | `index.html` | Estrutura das telas: Escrever, Registros, detalhe e Seus dados |
-| `styles.css` | Visual de papel pautado em tons de terracota, sempre claro |
+| `styles.css` | Visual de papel pautado em tons naturais (verde e terracota), sempre claro |
 | `app.js` | Toda a lógica: guardar, listar, abrir, copiar, apagar, exportar e importar |
 | `sw.js` | Service worker que guarda os arquivos do app para abrir sem conexão |
 | `manifest.json` | Nome, cores e ícones para a instalação na Tela de Início |
