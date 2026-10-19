@@ -7,11 +7,12 @@ Diário pessoal em português, feito para o iPhone. Funciona como app da Tela de
 | Arquivo | Para que serve |
 |---|---|
 | `index.html` | Estrutura das telas: Escrever, Registros, detalhe e Seus dados |
-| `styles.css` | Visual em tons naturais, modo claro e escuro automáticos |
+| `styles.css` | Visual de papel pautado em tons de terracota, sempre claro |
 | `app.js` | Toda a lógica: guardar, listar, abrir, copiar, apagar, exportar e importar |
 | `sw.js` | Service worker que guarda os arquivos do app para abrir sem conexão |
 | `manifest.json` | Nome, cores e ícones para a instalação na Tela de Início |
-| `icons/` | Ícones do app (180, 192 e 512 px) |
+| `icons/` | Logo e ícones do app (180, 192 e 512 px) |
+| `fonts/` | Fontes Instrument Serif, Newsreader e Figtree, guardadas no próprio app para funcionar sem internet |
 
 Os registros ficam somente no armazenamento local do navegador (chave `entrelinhas.registros.v1`). Nada é enviado para nenhum servidor. Não há analytics, anúncios nem rastreadores.
 

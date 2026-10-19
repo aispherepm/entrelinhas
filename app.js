@@ -2,7 +2,28 @@
   'use strict';
 
   var CHAVE = 'entrelinhas.registros.v1';
-  var HUMORES = ['tranquila', 'em paz', 'pensativa', 'ansiosa', 'triste', 'irritada', 'cansada', 'animada', 'grata'];
+  var HUMORES = [
+    { nome: 'tranquila', cor: '#8FAE86' },
+    { nome: 'em paz', cor: '#7FA3AE' },
+    { nome: 'grata', cor: '#D4A246' },
+    { nome: 'animada', cor: '#E0874E' },
+    { nome: 'pensativa', cor: '#9C8DB5' },
+    { nome: 'cansada', cor: '#AA9C8C' },
+    { nome: 'ansiosa', cor: '#C7A65C' },
+    { nome: 'angustiada', cor: '#8E6878' },
+    { nome: 'triste', cor: '#6F8BAE' },
+    { nome: 'irritada', cor: '#B9543C' }
+  ];
+  var CORES = {};
+  HUMORES.forEach(function (h) { CORES[h.nome] = h.cor; });
+
+  function ponto(humor) {
+    var s = document.createElement('span');
+    s.className = 'ponto';
+    s.setAttribute('aria-hidden', 'true');
+    if (humor && CORES[humor]) s.style.setProperty('--cor', CORES[humor]);
+    return s;
+  }
 
   var INSTRUCAO_REFLEXAO =
     'Quero refletir sobre este registro do meu diário. Responda em português com acolhimento e sem julgamento. ' +
@@ -137,6 +158,7 @@
   var TELAS = ['escrever', 'registros', 'detalhe', 'sobre'];
 
   function ir(nome, opcoes) {
+    if (!(opcoes && opcoes.manterAviso)) { clearTimeout(timerAviso); $('aviso').classList.remove('visivel'); }
     TELAS.forEach(function (t) { $('tela-' + t).hidden = (t !== nome); });
     var abaAtiva = nome === 'detalhe' ? 'registros' : nome;
     document.querySelectorAll('.aba').forEach(function (b) {
@@ -162,7 +184,7 @@
   function renderHumores() {
     var caixa = $('lista-humores');
     var opcoes = [{ valor: '', rotulo: 'Prefiro não escolher', classe: 'sem-humor' }]
-      .concat(HUMORES.map(function (h) { return { valor: h, rotulo: h }; }));
+      .concat(HUMORES.map(function (h) { return { valor: h.nome, rotulo: h.nome }; }));
     opcoes.forEach(function (o, i) {
       var div = document.createElement('div');
       div.className = 'chip' + (o.classe ? ' ' + o.classe : '');
@@ -174,7 +196,8 @@
       if (i === 0) input.checked = true;
       var label = document.createElement('label');
       label.htmlFor = input.id;
-      label.textContent = o.rotulo;
+      if (o.valor) label.appendChild(ponto(o.valor));
+      label.appendChild(document.createTextNode(o.rotulo));
       div.appendChild(input);
       div.appendChild(label);
       caixa.appendChild(div);
@@ -198,8 +221,8 @@
     campo.value = '';
     try { sessionStorage.removeItem('entrelinhas.rascunho'); } catch (err) {}
     $('humor-0').checked = true;
+    ir('registros', { manterAviso: true });
     avisar('Registro guardado.');
-    ir('registros');
   });
 
   // Rascunho temporário para não perder o texto se o app for fechado sem querer
@@ -234,7 +257,8 @@
       if (r.humor) {
         var h = document.createElement('span');
         h.className = 'item-humor';
-        h.textContent = r.humor;
+        h.appendChild(ponto(r.humor));
+        h.appendChild(document.createTextNode(r.humor));
         topo.appendChild(h);
       }
       var p = document.createElement('p');
@@ -256,7 +280,10 @@
     if (!r) { avisar('Registro não encontrado.'); ir('registros'); return; }
     registroAberto = r;
     $('titulo-detalhe').textContent = dataLonga(r.criadoEm);
-    $('detalhe-humor').textContent = r.humor ? 'Humor: ' + r.humor : 'Sem humor escolhido';
+    var tag = $('detalhe-humor');
+    tag.textContent = '';
+    if (r.humor) tag.appendChild(ponto(r.humor));
+    tag.appendChild(document.createTextNode(r.humor ? r.humor : 'sem humor escolhido'));
     $('detalhe-texto').textContent = r.texto;
     $('ajuda-reflexao').hidden = true;
     ir('detalhe');
@@ -295,8 +322,8 @@
         var lista = carregar().filter(function (x) { return x.id !== alvo.id; });
         if (salvar(lista)) {
           registroAberto = null;
-          avisar('Registro apagado.');
           ir('registros');
+          avisar('Registro apagado.');
         }
       });
   });
@@ -388,6 +415,8 @@
   /* ---------- Início ---------- */
 
   renderHumores();
+  var fmtHoje = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('hoje').textContent = fmtHoje.format(new Date());
   try {
     var rascunho = sessionStorage.getItem('entrelinhas.rascunho');
     if (rascunho) $('campo-texto').value = rascunho;

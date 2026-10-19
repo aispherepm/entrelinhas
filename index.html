@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Entrelinhas</title>
   <meta name="description" content="Diário pessoal para registrar como você está. Os registros ficam apenas neste aparelho.">
-  <meta name="theme-color" content="#F4EFE7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1F1D1A" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F6EFE4">
+  <meta name="color-scheme" content="light only">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Entrelinhas">
@@ -15,24 +15,29 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="preload" href="./fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
-    <h1 class="marca">Entrelinhas</h1>
+    <h1 class="marca">
+      <img src="./icons/icon-192.png" alt="" width="34" height="34">
+      <span>Entrelinhas</span>
+    </h1>
   </header>
 
   <main id="conteudo" tabindex="-1">
 
     <!-- ESCREVER -->
     <section id="tela-escrever" class="tela" aria-labelledby="titulo-escrever">
-      <h2 id="titulo-escrever" class="pergunta">Como você está, de verdade?</h2>
+      <p class="hoje" id="hoje"></p>
+      <h2 id="titulo-escrever" class="pergunta">Como você está, <em>de verdade?</em></h2>
 
       <form id="form-registro" novalidate>
         <label for="campo-texto" class="sr-only">Escreva livremente</label>
-        <textarea id="campo-texto" name="texto" rows="9"
+        <textarea id="campo-texto" name="texto" rows="8"
           placeholder="Escreva do seu jeito, sem pressa."
           aria-describedby="dica-texto"></textarea>
         <p id="dica-texto" class="dica">Só você vê o que escreve aqui.</p>

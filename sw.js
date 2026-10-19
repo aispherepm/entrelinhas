@@ -1,6 +1,6 @@
 /* Service worker do Entrelinhas: guarda os arquivos do app para abrir sem conexão.
    Os registros NÃO passam por aqui; ficam só no armazenamento local do navegador. */
-var VERSAO = 'entrelinhas-v2';
+var VERSAO = 'entrelinhas-v3';
 var ARQUIVOS = [
   './',
   './index.html',
@@ -9,7 +9,14 @@ var ARQUIVOS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './fonts/instrument-serif-latin-400-normal.woff2',
+  './fonts/instrument-serif-latin-400-italic.woff2',
+  './fonts/newsreader-latin-400-normal.woff2',
+  './fonts/newsreader-latin-400-italic.woff2',
+  './fonts/newsreader-latin-500-normal.woff2',
+  './fonts/figtree-latin-400-normal.woff2',
+  './fonts/figtree-latin-600-normal.woff2'
 ];
 
 self.addEventListener('install', function (e) {
