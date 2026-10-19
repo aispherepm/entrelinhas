@@ -223,3 +223,43 @@ dialog::backdrop { background: rgba(42, 36, 32, .45); }
 dialog h2 { font-family: var(--display); font-weight: 400; font-size: 1.7rem; margin: 14px 0 4px; }
 .dialogo-botoes { display: flex; gap: 10px; }
 .dialogo-botoes .botao { margin-top: 12px; }
+
+/* Alternar (só ouvir / automático) */
+.alternar { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-top: 16px; cursor: pointer; }
+.alternar input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.alternar-trilho { position: relative; flex: none; width: 46px; height: 28px; border-radius: 999px; background: var(--borda); transition: background .2s; }
+.alternar-trilho::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
+.alternar input:checked + .alternar-trilho { background: var(--barro); }
+.alternar input:checked + .alternar-trilho::after { transform: translateX(18px); }
+.alternar input:focus-visible + .alternar-trilho { outline: 3px solid var(--foco); outline-offset: 2px; }
+.alternar-texto { font-size: .98rem; }
+
+/* Reflexão */
+.reflexao:empty { display: none; }
+.reflexao {
+  margin-top: 16px; padding: 6px 20px 18px;
+  border-radius: var(--raio);
+  background: linear-gradient(180deg, #F1F4EC, #FBFAF4);
+  border: 1px solid #D9E1D1;
+  box-shadow: 0 14px 32px -24px rgba(60, 80, 50, .5);
+}
+.reflexao-titulo { font-family: var(--display); font-weight: 400; font-style: italic; font-size: 1.7rem; color: var(--barro); margin: 14px 0 4px; }
+.reflexao-parte h4 { margin: 14px 0 2px; font-size: .74rem; letter-spacing: .13em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 600; }
+.reflexao-parte p { margin: 0; font-family: var(--leitura); font-size: 1.08rem; line-height: 1.6; }
+.parte-pergunta p { font-style: italic; color: var(--barro); }
+.parte-cuidado { background: var(--perigo-claro); border-radius: 12px; padding: 2px 14px 12px; margin-top: 10px; }
+.reflexao-nota { font-size: .8rem; color: var(--tinta-suave); margin: 16px 0 0; }
+.reflexao-espera { font-family: var(--leitura); font-style: italic; color: var(--tinta-suave); margin: 8px 0 4px; }
+.reflexao.carregando .reflexao-espera::after { content: ""; display: block; height: 3px; margin-top: 14px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--barro), transparent); background-size: 200% 100%; animation: respirar 1.6s ease-in-out infinite; }
+@keyframes respirar { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.reflexao-erro { color: var(--perigo); margin: 10px 0 0; }
+.botao.texto { background: none; border: 0; color: var(--barro); min-height: 44px; margin-top: 8px; width: auto; padding: 8px 0; }
+
+/* Campos de configuração */
+.rotulo { display: block; font-weight: 600; font-size: .92rem; margin-top: 10px; }
+.campo { width: 100%; margin-top: 6px; min-height: 48px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--borda); background: #fff; font: inherit; font-size: 16px; color: var(--tinta); }
+.campo:focus { outline: none; border-color: var(--barro); box-shadow: 0 0 0 3px rgba(79, 102, 72, .2); }
+.como { margin: 8px 0; }
+.como summary { cursor: pointer; color: var(--barro); font-weight: 600; min-height: 40px; display: flex; align-items: center; }
+.como ol { margin: 4px 0 8px; padding-left: 22px; }
+.como li { margin: 4px 0; }

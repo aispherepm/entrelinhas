@@ -27,10 +27,32 @@
 
   var INSTRUCAO_REFLEXAO =
     'Quero refletir sobre este registro do meu diário. Responda em português com acolhimento e sem julgamento. ' +
-    'Resuma brevemente o que entendeu e pergunte se entendeu certo. Depois faça no máximo uma pergunta aberta por vez, sem me pressionar. ' +
-    'Se mencionar psicologia ou neurociência, explique os conceitos em linguagem simples e diferencie informação geral de hipótese sobre mim. ' +
+    'Resuma brevemente o que entendeu e pergunte se entendeu certo. Se fizer sentido, ofereça um olhar possível a partir da psicologia, da psicanálise ou da neurociência, em linguagem simples e como hipótese, nunca como certeza. ' +
+    'Depois me dê uma motivação sincera e um conselho prático, pequeno e gentil para hoje. Faça no máximo uma pergunta aberta, sem me pressionar. ' +
     'Não faça diagnósticos nem se apresente como psicólogo, psicanalista, neurocientista ou profissional de saúde. ' +
-    'Não force interpretações psicanalíticas. Se eu disser que não quero perguntas ou interpretações, apenas me escute.';
+    'Não force interpretações psicanalíticas. Se eu disser que só quero ser ouvida, apenas me escute, sem análise nem conselho.';
+
+  var CHAVE_API = 'entrelinhas.chaveApi';
+  var CHAVE_AUTO = 'entrelinhas.reflexaoAutomatica';
+  var MODELO = 'claude-sonnet-5-5';
+
+  var SISTEMA_REFLEXAO = [
+    'Você é a voz de reflexão do Entrelinhas, um diário pessoal. Fala com uma mulher adulta que acabou de escrever um registro sobre como está.',
+    'Seu jeito: acolhedor, caloroso, curioso e cuidadoso, em português do Brasil, com frases simples e humanas. Nunca use travessão; use vírgula, ponto ou dois-pontos.',
+    'Você tem bons conhecimentos gerais de psicologia, de abordagens psicodinâmicas e psicanalíticas e de neurociência, e pode usá-los para apoiar a reflexão. Mas você não é psicóloga, psicanalista, neurocientista nem profissional de saúde, não alega credenciais nem experiência clínica, e não descreve a conversa como terapia.',
+    'Regras:',
+    '1. Apresente conceitos como informação geral, em linguagem simples. Toda leitura sobre ela é uma possibilidade, nunca um fato ou diagnóstico: deixe a incerteza clara (por exemplo, "talvez", "pode ser que") e convide ela a ver se combina com a experiência dela.',
+    '2. Não interprete sonhos, infância, inconsciente, personalidade ou padrões como se soubesse o que significam. Não reduza sentimentos a explicações cerebrais nem use termos técnicos para dar falsa certeza.',
+    '3. Não recomende interromper ou alterar medicação, tratamento ou acompanhamento profissional.',
+    '4. A motivação deve ser sincera e ligada ao que ela escreveu, sem frases feitas nem positividade forçada. Valide antes de encorajar.',
+    '5. O conselho deve ser um único passo prático, pequeno, gentil e opcional para hoje (algo que caiba no dia dela), nunca uma lista nem uma ordem.',
+    '6. No máximo uma pergunta aberta, sem pressionar.',
+    '7. Se ela pedir só para ser ouvida, ou se o campo so_ouvir for verdadeiro, escreva apenas o acolhimento: deixe olhar, conselho e pergunta vazios, e a motivação também, a não ser que caiba uma frase curta de presença.',
+    '8. Se o registro mostrar sofrimento intenso, acolha com cuidado, pergunte do que ela precisa agora e incentive apoio de alguém de confiança ou de um profissional. Se houver qualquer sinal de que ela pode se machucar ou está em perigo, priorize a segurança: diga com carinho e clareza para buscar ajuda agora, presencialmente ou pelo CVV (ligue 188, gratuito, 24 horas) ou SAMU 192, e deixe o olhar psicológico de lado. Nesse caso preencha o campo cuidado com essa orientação.',
+    'Formato: responda SOMENTE com um objeto JSON válido, sem texto antes ou depois, com estas chaves (strings; use "" quando não se aplicar):',
+    '{"acolhimento": "2 a 4 frases refletindo o que você entendeu, terminando com uma checagem como se entendeu certo", "olhar": "1 a 3 frases com um olhar possível da psicologia, psicanálise ou neurociência, como hipótese", "motivacao": "1 a 2 frases", "conselho": "1 a 2 frases com um passo pequeno", "pergunta": "uma pergunta aberta", "cuidado": "só se houver sofrimento intenso ou risco"}',
+    'Seja breve: no total, até cerca de 180 palavras.'
+  ].join('\n');
 
   var $ = function (id) { return document.getElementById(id); };
   var registroAberto = null;
@@ -58,6 +80,10 @@
       avisar('Não foi possível guardar. O armazenamento do navegador pode estar cheio ou bloqueado.');
       return false;
     }
+  }
+
+  function reflexaoValida(x) {
+    return x && typeof x === 'object' && typeof x.criadaEm === 'string' && x.partes && typeof x.partes === 'object';
   }
 
   function valido(r) {
@@ -215,14 +241,19 @@
     }
     var marcado = document.querySelector('input[name="humor"]:checked');
     var humor = marcado && marcado.value ? marcado.value : null;
+    var soOuvir = $('so-ouvir').checked;
+    var novo = { id: novoId(), criadoEm: new Date().toISOString(), humor: humor, texto: texto };
+    if (soOuvir) novo.soOuvir = true;
     var lista = carregar();
-    lista.push({ id: novoId(), criadoEm: new Date().toISOString(), humor: humor, texto: texto });
+    lista.push(novo);
     if (!salvar(lista)) return;
     campo.value = '';
     try { sessionStorage.removeItem('entrelinhas.rascunho'); } catch (err) {}
     $('humor-0').checked = true;
-    ir('registros', { manterAviso: true });
+    $('so-ouvir').checked = false;
+    abrir(novo.id, { manterAviso: true });
     avisar('Registro guardado.');
+    if (reflexaoLigada()) pedirReflexao(novo.id);
   });
 
   // Rascunho temporário para não perder o texto se o app for fechado sem querer
@@ -275,7 +306,7 @@
 
   /* ---------- Detalhe ---------- */
 
-  function abrir(id) {
+  function abrir(id, opcoes) {
     var r = carregar().filter(function (x) { return x.id === id; })[0];
     if (!r) { avisar('Registro não encontrado.'); ir('registros'); return; }
     registroAberto = r;
@@ -286,8 +317,228 @@
     tag.appendChild(document.createTextNode(r.humor ? r.humor : 'sem humor escolhido'));
     $('detalhe-texto').textContent = r.texto;
     $('ajuda-reflexao').hidden = true;
-    ir('detalhe');
+    ir('detalhe', opcoes);
+    renderReflexao(r);
   }
+
+  /* ---------- Reflexão automática ---------- */
+
+  function lerChave() { try { return localStorage.getItem(CHAVE_API) || ''; } catch (e) { return ''; } }
+  function reflexaoLigada() {
+    try { return !!lerChave() && localStorage.getItem(CHAVE_AUTO) !== 'nao'; } catch (e) { return false; }
+  }
+
+  var pedindo = {};
+
+  function textoDoPedido(r) {
+    return 'Registro de ' + dataLonga(r.criadoEm) + (r.humor ? ' (humor: ' + r.humor + ')' : '') + '.\n' +
+      'so_ouvir: ' + (r.soOuvir ? 'verdadeiro' : 'falso') + '\n\n' + r.texto;
+  }
+
+  function chamarClaude(chave, sistema, mensagem, maxTokens) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 60000) : null;
+    return fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: ctrl ? ctrl.signal : undefined,
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': chave,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({ model: MODELO, max_tokens: maxTokens, system: sistema, messages: [{ role: 'user', content: mensagem }] })
+    }).then(function (resp) {
+      if (t) clearTimeout(t);
+      return resp.json().catch(function () { return {}; }).then(function (dados) {
+        if (!resp.ok) {
+          var err = new Error((dados && dados.error && dados.error.message) || ('Erro ' + resp.status));
+          err.status = resp.status;
+          throw err;
+        }
+        var texto = (dados.content || []).filter(function (c) { return c.type === 'text'; }).map(function (c) { return c.text; }).join('');
+        return texto;
+      });
+    }, function (err) { if (t) clearTimeout(t); throw err; });
+  }
+
+  function lerPartes(texto) {
+    var limpo = texto.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+    var ini = limpo.indexOf('{'), fim = limpo.lastIndexOf('}');
+    try {
+      var obj = JSON.parse(limpo.slice(ini, fim + 1));
+      var partes = {};
+      ['acolhimento', 'olhar', 'motivacao', 'conselho', 'pergunta', 'cuidado'].forEach(function (k) {
+        partes[k] = typeof obj[k] === 'string' ? obj[k].trim() : '';
+      });
+      if (partes.acolhimento || partes.cuidado) return partes;
+    } catch (e) {}
+    return { acolhimento: texto.trim(), olhar: '', motivacao: '', conselho: '', pergunta: '', cuidado: '' };
+  }
+
+  function mensagemDeErro(err) {
+    if (!navigator.onLine) return 'Sem conexão agora. Você pode pedir a reflexão quando estiver com internet.';
+    if (err && err.status === 401) return 'A chave de API não foi aceita. Confira a chave em Seus dados.';
+    if (err && (err.status === 402 || err.status === 403)) return 'A conta da API recusou o pedido. Verifique se há créditos ou permissão no console da Anthropic.';
+    if (err && err.status === 429) return 'Muitos pedidos em pouco tempo. Tente de novo daqui a um minuto.';
+    if (err && err.status >= 500) return 'O serviço do Claude está instável agora. Tente de novo em instantes.';
+    if (err && err.name === 'AbortError') return 'A reflexão demorou demais. Tente de novo.';
+    return 'Não foi possível gerar a reflexão agora. Tente de novo em instantes.';
+  }
+
+  function pedirReflexao(id) {
+    var chave = lerChave();
+    if (!chave) { renderReflexao(registroAberto); return; }
+    var r = carregar().filter(function (x) { return x.id === id; })[0];
+    if (!r || pedindo[id]) return;
+    pedindo[id] = true;
+    if (registroAberto && registroAberto.id === id) renderReflexao(r, { carregando: true });
+    chamarClaude(chave, SISTEMA_REFLEXAO, textoDoPedido(r), 900).then(function (texto) {
+      var partes = lerPartes(texto);
+      var lista = carregar();
+      lista.forEach(function (x) { if (x.id === id) x.reflexao = { criadaEm: new Date().toISOString(), modelo: MODELO, partes: partes }; });
+      salvar(lista);
+      delete pedindo[id];
+      if (registroAberto && registroAberto.id === id) {
+        registroAberto = lista.filter(function (x) { return x.id === id; })[0];
+        renderReflexao(registroAberto, { recemChegada: true });
+      }
+    }, function (err) {
+      delete pedindo[id];
+      if (registroAberto && registroAberto.id === id) renderReflexao(r, { erro: mensagemDeErro(err) });
+    });
+  }
+
+  var ROTULOS = [
+    ['cuidado', 'Antes de tudo'],
+    ['acolhimento', 'O que eu entendi'],
+    ['olhar', 'Um olhar possível'],
+    ['motivacao', 'Para te fortalecer'],
+    ['conselho', 'Um passo gentil para hoje'],
+    ['pergunta', 'Para seguir pensando']
+  ];
+
+  function renderReflexao(r, estado) {
+    var caixa = $('reflexao');
+    caixa.innerHTML = '';
+    caixa.classList.remove('carregando');
+    estado = estado || {};
+    if (!r) return;
+    var temChave = !!lerChave();
+
+    var titulo = document.createElement('h3');
+    titulo.className = 'reflexao-titulo';
+    titulo.textContent = 'Reflexão';
+    caixa.appendChild(titulo);
+
+    if (pedindo[r.id] || estado.carregando) {
+      caixa.classList.add('carregando');
+      var p = document.createElement('p');
+      p.className = 'reflexao-espera';
+      p.textContent = 'Lendo o seu registro com cuidado…';
+      caixa.appendChild(p);
+      return;
+    }
+
+    if (r.reflexao && r.reflexao.partes) {
+      ROTULOS.forEach(function (par) {
+        var valor = r.reflexao.partes[par[0]];
+        if (!valor) return;
+        var bloco = document.createElement('section');
+        bloco.className = 'reflexao-parte parte-' + par[0];
+        var h = document.createElement('h4');
+        h.textContent = par[1];
+        var t = document.createElement('p');
+        t.textContent = valor;
+        bloco.appendChild(h);
+        bloco.appendChild(t);
+        caixa.appendChild(bloco);
+      });
+      var nota = document.createElement('p');
+      nota.className = 'reflexao-nota';
+      nota.textContent = 'Reflexão gerada por IA, como apoio. Não é terapia nem diagnóstico.';
+      caixa.appendChild(nota);
+      if (temChave) caixa.appendChild(botaoPedir('Gerar outra reflexão', r.id, true));
+      if (estado.recemChegada) caixa.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    if (estado.erro) {
+      var e = document.createElement('p');
+      e.className = 'reflexao-erro';
+      e.textContent = estado.erro;
+      caixa.appendChild(e);
+    }
+
+    if (temChave) {
+      caixa.appendChild(botaoPedir(estado.erro ? 'Tentar de novo' : 'Pedir reflexão', r.id, false));
+    } else {
+      var info = document.createElement('p');
+      info.className = 'dica';
+      info.textContent = 'Para receber a reflexão aqui automaticamente, adicione sua chave do Claude em Seus dados. Ou use o botão abaixo para copiar o pedido e colar no app do Claude.';
+      caixa.appendChild(info);
+      var ir2 = document.createElement('button');
+      ir2.type = 'button';
+      ir2.className = 'botao secundario';
+      ir2.textContent = 'Configurar reflexão automática';
+      ir2.addEventListener('click', function () { ir('sobre'); });
+      caixa.appendChild(ir2);
+    }
+  }
+
+  function botaoPedir(rotulo, id, refazer) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = refazer ? 'botao texto' : 'botao principal';
+    b.textContent = rotulo;
+    b.addEventListener('click', function () { pedirReflexao(id); });
+    return b;
+  }
+
+  function renderConfigReflexao() {
+    var chave = lerChave();
+    $('estado-chave').textContent = chave
+      ? 'Chave guardada neste aparelho (termina em ' + chave.slice(-4) + ').'
+      : 'Nenhuma chave guardada.';
+    $('campo-chave').value = '';
+    $('botao-remover-chave').hidden = !chave;
+    $('linha-auto').hidden = !chave;
+    try { $('reflexao-auto').checked = localStorage.getItem(CHAVE_AUTO) !== 'nao'; } catch (e) {}
+  }
+
+  $('form-chave').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var chave = $('campo-chave').value.trim();
+    if (!chave) { avisar('Cole a chave antes de guardar.'); return; }
+    var botao = $('botao-guardar-chave');
+    botao.disabled = true;
+    botao.textContent = 'Testando a chave…';
+    chamarClaude(chave, 'Responda apenas: ok', 'teste', 5).then(function () {
+      try { localStorage.setItem(CHAVE_API, chave); localStorage.removeItem(CHAVE_AUTO); } catch (err) {}
+      avisar('Chave funcionando. A reflexão automática está ligada.');
+      renderConfigReflexao();
+    }, function (err) {
+      avisar(mensagemDeErro(err));
+    }).then(function () {
+      botao.disabled = false;
+      botao.textContent = 'Guardar e testar chave';
+    });
+  });
+
+  $('botao-remover-chave').addEventListener('click', function () {
+    confirmar('Remover a chave?', 'A reflexão automática será desligada. As reflexões já guardadas continuam nos registros.', 'Remover')
+      .then(function (sim) {
+        if (!sim) return;
+        try { localStorage.removeItem(CHAVE_API); } catch (e) {}
+        renderConfigReflexao();
+        avisar('Chave removida.');
+      });
+  });
+
+  $('reflexao-auto').addEventListener('change', function (e) {
+    try { localStorage.setItem(CHAVE_AUTO, e.target.checked ? 'sim' : 'nao'); } catch (err) {}
+    avisar(e.target.checked ? 'Reflexão automática ligada.' : 'Reflexão automática desligada.');
+  });
 
   $('botao-copiar').addEventListener('click', function () {
     if (!registroAberto) return;
@@ -302,6 +553,7 @@
     var pedido = INSTRUCAO_REFLEXAO + '\n\n' +
       'Registro de ' + dataLonga(r.criadoEm) +
       (r.humor ? ' (humor: ' + r.humor + ')' : '') + ':\n\n' +
+      (r.soOuvir ? 'Hoje eu só quero ser ouvida.\n\n' : '') +
       r.texto;
     copiar(pedido).then(function (ok) {
       if (ok) {
@@ -331,6 +583,7 @@
   /* ---------- Seus dados ---------- */
 
   function renderInfo() {
+    renderConfigReflexao();
     var n = carregar().length;
     var partes = [n === 1 ? 'Há 1 registro guardado neste aparelho.' : 'Há ' + n + ' registros guardados neste aparelho.'];
     if (!armazenamentoOk) partes.push('O armazenamento do navegador parece bloqueado. Verifique se a navegação privada está desativada.');
@@ -395,7 +648,10 @@
       var entrada = Array.isArray(dados) ? dados : (dados && Array.isArray(dados.registros) ? dados.registros : null);
       if (!entrada) { avisar('Não encontrei registros neste arquivo.'); return; }
       var novos = entrada.filter(valido).map(function (r) {
-        return { id: r.id, criadoEm: new Date(r.criadoEm).toISOString(), humor: r.humor || null, texto: r.texto };
+        var n = { id: r.id, criadoEm: new Date(r.criadoEm).toISOString(), humor: r.humor || null, texto: r.texto };
+        if (r.soOuvir === true) n.soOuvir = true;
+        if (reflexaoValida(r.reflexao)) n.reflexao = r.reflexao;
+        return n;
       });
       if (novos.length === 0) { avisar('Não encontrei registros válidos neste arquivo.'); return; }
       var atual = carregar();

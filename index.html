@@ -46,6 +46,12 @@
           <div class="chips" id="lista-humores"></div>
         </fieldset>
 
+        <label class="alternar" for="so-ouvir">
+          <input type="checkbox" id="so-ouvir">
+          <span class="alternar-trilho" aria-hidden="true"></span>
+          <span class="alternar-texto">Hoje só quero ser ouvida <span class="opcional">(sem conselhos)</span></span>
+        </label>
+
         <button type="submit" class="botao principal" id="botao-guardar">Guardar registro</button>
       </form>
     </section>
@@ -72,8 +78,10 @@
         <div id="detalhe-texto" class="texto-registro"></div>
       </article>
 
+      <section id="reflexao" class="reflexao" aria-live="polite" aria-label="Reflexão sobre o registro"></section>
+
       <div class="acoes">
-        <button type="button" class="botao principal" id="botao-reflexao">Copiar pedido de reflexão</button>
+        <button type="button" class="botao secundario" id="botao-reflexao">Copiar pedido para o app do Claude</button>
         <div id="ajuda-reflexao" class="caixa-ajuda" hidden role="status">
           <p><strong>Pedido copiado.</strong></p>
           <ol>
@@ -94,9 +102,37 @@
 
       <div class="cartao">
         <h3>Onde ficam os registros</h3>
-        <p>Tudo fica guardado somente neste aparelho, dentro do navegador. Não há conta, servidor, sincronização, anúncios nem rastreadores.</p>
+        <p>Tudo fica guardado somente neste aparelho, dentro do navegador. Não há conta, servidor próprio, sincronização, anúncios nem rastreadores.</p>
+        <p>Se a reflexão automática estiver ligada, o texto de cada registro é enviado ao Claude (Anthropic) apenas para gerar a reflexão, e a resposta volta para ficar guardada aqui, junto do registro.</p>
         <p>Se você apagar os dados do navegador, remover o app da Tela de Início ou trocar de aparelho, os registros podem se perder. Por isso vale exportar uma cópia de vez em quando.</p>
         <p id="info-armazenamento" class="dica"></p>
+      </div>
+
+      <div class="cartao" id="cartao-reflexao">
+        <h3>Reflexão automática</h3>
+        <p>Com a sua chave de API do Claude, a reflexão aparece logo depois que você guarda um registro, com acolhimento, motivação e um conselho gentil.</p>
+        <details class="como">
+          <summary>Como conseguir a chave</summary>
+          <ol>
+            <li>Acesse <strong>console.anthropic.com</strong> e entre ou crie sua conta.</li>
+            <li>Em <strong>Billing</strong>, adicione créditos. A API é cobrada à parte da assinatura do Claude, por uso.</li>
+            <li>Em <strong>API Keys</strong>, toque em <strong>Create Key</strong>, dê um nome (por exemplo, Entrelinhas) e copie a chave.</li>
+            <li>Cole aqui embaixo e toque em <strong>Guardar e testar chave</strong>.</li>
+          </ol>
+        </details>
+        <p class="dica" id="estado-chave"></p>
+        <form id="form-chave" novalidate>
+          <label for="campo-chave" class="rotulo">Chave de API</label>
+          <input type="password" id="campo-chave" class="campo" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…">
+          <button type="submit" class="botao principal" id="botao-guardar-chave">Guardar e testar chave</button>
+        </form>
+        <label class="alternar" for="reflexao-auto" id="linha-auto" hidden>
+          <input type="checkbox" id="reflexao-auto" checked>
+          <span class="alternar-trilho" aria-hidden="true"></span>
+          <span class="alternar-texto">Refletir automaticamente ao guardar</span>
+        </label>
+        <button type="button" class="botao perigo" id="botao-remover-chave" hidden>Remover chave</button>
+        <p class="aviso-leve">A chave fica guardada só neste aparelho. Não compartilhe a chave com ninguém; quem tiver a chave pode usar os seus créditos.</p>
       </div>
 
       <div class="cartao">
@@ -116,7 +152,7 @@
 
       <div class="cartao discreto">
         <h3>Sobre o Entrelinhas</h3>
-        <p>O Entrelinhas é uma ferramenta pessoal de escrita e reflexão. Ele não substitui acompanhamento profissional, e as respostas de uma IA não são terapia.</p>
+        <p>O Entrelinhas é uma ferramenta pessoal de escrita e reflexão. Ele não substitui acompanhamento profissional, e as reflexões geradas por IA não são terapia nem diagnóstico.</p>
         <p>Se em algum momento precisar conversar com alguém, o CVV atende gratuitamente pelo telefone 188, a qualquer hora. Em perigo imediato, ligue 192 ou 190.</p>
       </div>
     </section>

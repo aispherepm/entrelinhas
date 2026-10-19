@@ -14,7 +14,11 @@ Diário pessoal em português, feito para o iPhone. Funciona como app da Tela de
 | `icons/` | Logo e ícones do app (180, 192 e 512 px) |
 | `fonts/` | Fontes Instrument Serif, Newsreader e Figtree, guardadas no próprio app para funcionar sem internet |
 
-Os registros ficam somente no armazenamento local do navegador (chave `entrelinhas.registros.v1`). Nada é enviado para nenhum servidor. Não há analytics, anúncios nem rastreadores.
+Os registros ficam somente no armazenamento local do navegador (chave `entrelinhas.registros.v1`). Não há servidor próprio, analytics, anúncios nem rastreadores.
+
+## Reflexão automática
+
+Em **Seus dados → Reflexão automática**, cole uma chave de API do Claude (criada em console.anthropic.com, cobrada à parte, por uso). A chave fica só no aparelho. Com ela ligada, cada registro guardado é enviado ao Claude (modelo `claude-sonnet-5-5`) e a reflexão aparece logo abaixo do registro, com acolhimento, um olhar possível, motivação, um passo gentil e uma pergunta. A reflexão fica guardada junto do registro e entra na exportação. A opção **Hoje só quero ser ouvida** pede uma resposta só de acolhimento, sem conselhos.
 
 ## Abrir no computador
 
