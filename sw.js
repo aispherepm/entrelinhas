@@ -1,6 +1,6 @@
 /* Service worker do Entrelinhas: guarda os arquivos do app para abrir sem conexão.
    Os registros NÃO passam por aqui; ficam só no armazenamento local do navegador. */
-var VERSAO = 'entrelinhas-v1';
+var VERSAO = 'entrelinhas-v2';
 var ARQUIVOS = [
   './',
   './index.html',
