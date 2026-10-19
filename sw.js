@@ -1,6 +1,6 @@
 /* Service worker do Entrelinhas: guarda os arquivos do app para abrir sem conexão.
    Os registros NÃO passam por aqui; ficam só no armazenamento local do navegador. */
-var VERSAO = 'entrelinhas-v4';
+var VERSAO = 'entrelinhas-v5';
 var ARQUIVOS = [
   './',
   './index.html',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', function (e) {
   // Navegação: tenta a rede, cai para o cache sem conexão
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(function (resp) {
+      fetch(req, { cache: 'no-cache' }).then(function (resp) {
         var copia = resp.clone();
         caches.open(VERSAO).then(function (c) { c.put('./index.html', copia); });
         return resp;
@@ -51,17 +51,16 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  // Demais arquivos: cache primeiro, atualiza em segundo plano
+  // Demais arquivos: rede primeiro (sempre a versão mais nova), cópia guardada só sem conexão
   e.respondWith(
-    caches.match(req).then(function (emCache) {
-      var daRede = fetch(req).then(function (resp) {
-        if (resp && resp.ok) {
-          var copia = resp.clone();
-          caches.open(VERSAO).then(function (c) { c.put(req, copia); });
-        }
-        return resp;
-      }).catch(function () { return emCache; });
-      return emCache || daRede;
+    fetch(req, { cache: 'no-cache' }).then(function (resp) {
+      if (resp && resp.ok) {
+        var copia = resp.clone();
+        caches.open(VERSAO).then(function (c) { c.put(req, copia); });
+      }
+      return resp;
+    }).catch(function () {
+      return caches.match(req, { ignoreSearch: true });
     })
   );
 });

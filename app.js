@@ -431,7 +431,17 @@
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function () {});
+      var tinhaControle = !!navigator.serviceWorker.controller;
+      var recarregou = false;
+      // Quando uma versão nova do app assume, recarrega uma vez para mostrar o visual atualizado
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!tinhaControle || recarregou) return;
+        recarregou = true;
+        window.location.reload();
+      });
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(function (reg) {
+        reg.update().catch(function () {});
+      }).catch(function () {});
     });
   }
 })();

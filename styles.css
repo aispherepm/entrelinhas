@@ -56,11 +56,13 @@ body {
 
 /* Cabeçalho */
 .topo { padding: calc(16px + env(safe-area-inset-top)) 22px 0; max-width: 620px; margin: 0 auto; }
-.marca { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.95rem; line-height: 1; letter-spacing: -.005em; color: var(--tinta); }
-.marca img { width: 34px; height: 34px; border-radius: 9px; box-shadow: 0 1px 3px rgba(60, 50, 30, .22); }
-.marca .palavra { position: relative; padding-bottom: 4px; }
-.marca em { font-style: italic; color: var(--terracota); }
-.marca .palavra::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(to right, var(--borda) 0 44%, var(--terracota) 44% 100%); opacity: .7; }
+.marca { margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.35rem; line-height: 1; letter-spacing: -.012em; color: var(--tinta); }
+.marca .palavra { position: relative; display: inline-block; padding-bottom: 7px; }
+.marca em { font-style: italic; color: var(--terracota); letter-spacing: 0; margin-left: .02em; }
+.marca .palavra::after {
+  content: ""; position: absolute; left: 0; right: -.25em; bottom: 0; height: 1.5px; border-radius: 2px;
+  background: linear-gradient(to right, var(--pauta) 0, var(--borda) 38%, var(--terracota) 46%, rgba(168, 90, 62, 0) 100%);
+}
 
 main { max-width: 620px; margin: 0 auto; padding: 0 22px 28px; outline: none; }
 
