@@ -1,0 +1,17 @@
+{
+  "name": "Entrelinhas",
+  "short_name": "Entrelinhas",
+  "description": "Diário pessoal para registrar como você está. Os registros ficam apenas neste aparelho.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4EFE7",
+  "theme_color": "#F4EFE7",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

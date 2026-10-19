@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Entrelinhas</title>
+  <meta name="description" content="Diário pessoal para registrar como você está. Os registros ficam apenas neste aparelho.">
+  <meta name="theme-color" content="#F4EFE7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1F1D1A" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Entrelinhas">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo">
+    <h1 class="marca">Entrelinhas</h1>
+  </header>
+
+  <main id="conteudo" tabindex="-1">
+
+    <!-- ESCREVER -->
+    <section id="tela-escrever" class="tela" aria-labelledby="titulo-escrever">
+      <h2 id="titulo-escrever" class="pergunta">Como você está, de verdade?</h2>
+
+      <form id="form-registro" novalidate>
+        <label for="campo-texto" class="sr-only">Escreva livremente</label>
+        <textarea id="campo-texto" name="texto" rows="9"
+          placeholder="Escreva do seu jeito, sem pressa."
+          aria-describedby="dica-texto"></textarea>
+        <p id="dica-texto" class="dica">Só você vê o que escreve aqui.</p>
+
+        <fieldset class="humores">
+          <legend>Como você descreveria o seu humor? <span class="opcional">(opcional)</span></legend>
+          <div class="chips" id="lista-humores"></div>
+        </fieldset>
+
+        <button type="submit" class="botao principal" id="botao-guardar">Guardar registro</button>
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section id="tela-registros" class="tela" aria-labelledby="titulo-registros" hidden>
+      <h2 id="titulo-registros" class="titulo-tela">Seus registros</h2>
+      <p class="dica" id="contagem" aria-live="polite"></p>
+      <ul id="lista-registros" class="lista"></ul>
+      <div id="vazio" class="vazio" hidden>
+        <p>Ainda não há registros por aqui.</p>
+        <button type="button" class="botao secundario" data-ir="escrever">Escrever o primeiro</button>
+      </div>
+    </section>
+
+    <!-- DETALHE -->
+    <section id="tela-detalhe" class="tela" aria-labelledby="titulo-detalhe" hidden>
+      <button type="button" class="voltar" data-ir="registros">
+        <span aria-hidden="true">‹</span> Voltar aos registros
+      </button>
+      <article class="registro-aberto">
+        <h2 id="titulo-detalhe" class="titulo-tela data-registro"></h2>
+        <p id="detalhe-humor" class="humor-tag"></p>
+        <div id="detalhe-texto" class="texto-registro"></div>
+      </article>
+
+      <div class="acoes">
+        <button type="button" class="botao principal" id="botao-reflexao">Copiar pedido de reflexão</button>
+        <div id="ajuda-reflexao" class="caixa-ajuda" hidden role="status">
+          <p><strong>Pedido copiado.</strong></p>
+          <ol>
+            <li>Abra uma conversa nova no Claude (app ou claude.ai).</li>
+            <li>Toque e segure no campo de mensagem e escolha <strong>Colar</strong>.</li>
+            <li>Envie quando se sentir à vontade.</li>
+          </ol>
+          <p class="dica">O Entrelinhas não envia nada sozinho. O texto só sai daqui quando você cola.</p>
+        </div>
+        <button type="button" class="botao secundario" id="botao-copiar">Copiar texto do registro</button>
+        <button type="button" class="botao perigo" id="botao-apagar">Apagar este registro</button>
+      </div>
+    </section>
+
+    <!-- SOBRE E DADOS -->
+    <section id="tela-sobre" class="tela" aria-labelledby="titulo-sobre" hidden>
+      <h2 id="titulo-sobre" class="titulo-tela">Seus dados</h2>
+
+      <div class="cartao">
+        <h3>Onde ficam os registros</h3>
+        <p>Tudo fica guardado somente neste aparelho, dentro do navegador. Não há conta, servidor, sincronização, anúncios nem rastreadores.</p>
+        <p>Se você apagar os dados do navegador, remover o app da Tela de Início ou trocar de aparelho, os registros podem se perder. Por isso vale exportar uma cópia de vez em quando.</p>
+        <p id="info-armazenamento" class="dica"></p>
+      </div>
+
+      <div class="cartao">
+        <h3>Cópia de segurança</h3>
+        <p>Exporte seus registros em um arquivo JSON ou importe um arquivo exportado antes.</p>
+        <p class="aviso-leve"><strong>Atenção:</strong> o arquivo exportado não é criptografado. Qualquer pessoa que o abrir consegue ler seus registros. Guarde-o em um lugar seguro.</p>
+        <button type="button" class="botao secundario" id="botao-exportar">Exportar registros</button>
+        <label class="botao secundario botao-arquivo" for="campo-importar">Importar arquivo</label>
+        <input type="file" id="campo-importar" accept="application/json,.json" class="sr-only">
+      </div>
+
+      <div class="cartao">
+        <h3>Apagar tudo</h3>
+        <p>Remove todos os registros deste aparelho. Não dá para desfazer.</p>
+        <button type="button" class="botao perigo" id="botao-apagar-tudo">Apagar todos os registros</button>
+      </div>
+
+      <div class="cartao discreto">
+        <h3>Sobre o Entrelinhas</h3>
+        <p>O Entrelinhas é uma ferramenta pessoal de escrita e reflexão. Ele não substitui acompanhamento profissional, e as respostas de uma IA não são terapia.</p>
+        <p>Se em algum momento precisar conversar com alguém, o CVV atende gratuitamente pelo telefone 188, a qualquer hora. Em perigo imediato, ligue 192 ou 190.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="abas" aria-label="Navegação principal">
+    <button type="button" class="aba" data-ir="escrever" aria-current="page">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      <span>Escrever</span>
+    </button>
+    <button type="button" class="aba" data-ir="registros">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4h12v16H6zM9 9h6M9 13h6M9 17h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Registros</span>
+    </button>
+    <button type="button" class="aba" data-ir="sobre">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      <span>Seus dados</span>
+    </button>
+  </nav>
+
+  <div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+
+  <dialog id="dialogo" aria-labelledby="dialogo-titulo" aria-describedby="dialogo-texto">
+    <form method="dialog">
+      <h2 id="dialogo-titulo"></h2>
+      <p id="dialogo-texto"></p>
+      <div class="dialogo-botoes">
+        <button value="cancelar" class="botao secundario" id="dialogo-cancelar">Cancelar</button>
+        <button value="confirmar" class="botao perigo" id="dialogo-confirmar">Apagar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
